@@ -14,6 +14,8 @@
 - `PROJECT_TECH_DOC.md`
 - `docs/DEVELOPMENT_PLAN_8_STEPS.md`
 - `docs/specs/step-01-foundation.md`
+- `docs/电商智能客服AI-Agent系统设计技术方案（完整版）.md`
+- `docs/电商智能客服AI-Agent系统设计技术方案（豆包精简版）.md`
 
 ## 快速启动
 
