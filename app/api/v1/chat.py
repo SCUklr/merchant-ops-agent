@@ -24,11 +24,14 @@ def encode_sse_event(event: ChatEvent) -> str:
 async def stream_events(payload: ChatRequest) -> AsyncGenerator[str, None]:
     """Yield SSE events for the request."""
 
+    trace_id = "system"
+
     async for event in orchestrator.run_stream(payload):
+        trace_id = event.trace_id
         yield encode_sse_event(event)
 
     done_event = ChatEvent(
-        trace_id="system",
+        trace_id=trace_id,
         phase="done",
         content="stream finished",
         meta={},

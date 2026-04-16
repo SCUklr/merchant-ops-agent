@@ -1,5 +1,7 @@
 """Step-01 API health tests."""
 
+import json
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -26,7 +28,7 @@ def test_health_endpoint() -> None:
 
 
 def test_stream_endpoint() -> None:
-    """Stream endpoint should emit staged SSE payloads."""
+    """Stream endpoint should emit full stage protocol."""
 
     client = TestClient(app)
     response = client.post(
@@ -39,6 +41,21 @@ def test_stream_endpoint() -> None:
     )
     assert response.status_code == 200
     assert "text/event-stream" in response.headers["content-type"]
-    assert '"phase": "intent"' in response.text
-    assert '"phase": "final"' in response.text
-    assert '"phase": "done"' in response.text
+
+    events: list[dict] = []
+    for raw_line in response.text.splitlines():
+        if not raw_line.startswith("data: "):
+            continue
+        payload = raw_line.removeprefix("data: ").strip()
+        events.append(json.loads(payload))
+
+    phases = [event["phase"] for event in events]
+    assert phases == ["intent", "retrieve", "tool", "guard", "final", "done"]
+
+    request_trace_id = events[0]["trace_id"]
+    assert request_trace_id != "system"
+    assert all(event["trace_id"] == request_trace_id for event in events)
+
+    for phase_event in events[:-1]:
+        assert "phase_latency_ms" in phase_event["meta"]
+        assert "total_elapsed_ms" in phase_event["meta"]

@@ -1,8 +1,11 @@
 """Schemas for chat APIs."""
 
 from typing import Any
+from typing import Literal
 
 from pydantic import BaseModel, Field
+
+ChatPhase = Literal["intent", "retrieve", "tool", "guard", "final", "done"]
 
 
 class ChatRequest(BaseModel):
@@ -18,6 +21,6 @@ class ChatEvent(BaseModel):
     """SSE event payload."""
 
     trace_id: str
-    phase: str
+    phase: ChatPhase
     content: str
     meta: dict[str, Any] = Field(default_factory=dict)
