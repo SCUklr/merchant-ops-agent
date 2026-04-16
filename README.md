@@ -1,25 +1,50 @@
 # AI 商家运营助手 Agent
 
-- 项目时间：2026.4 - 至今
-- 仓库地址：https://github.com/SCUklr/merchant-ops-agent
-- 项目类型：AI 应用开发
+面向电商商家运营场景的生产级 AI Agent 项目，采用 Spec-Driven + Step-by-Step 方式建设，目标是将问题处理流程标准化为：
 
-## 项目背景
+`检索 -> 分析 -> 执行 -> 校验`
 
-面向电商商家日常运营场景，构建支持商品规则问答、活动 SOP 查询、订单异常定位、评价归因与操作建议输出的智能助手，目标是把分散的运营问题转化为“检索 - 分析 - 执行”的闭环能力。
+## 当前状态
 
-## 主要职责
+- 已完成 Step 01：基础工程骨架 + 最小 FastAPI/SSE API
+- 待完成 Step 02-08：编排协议、RAG、工具链、评测、指标沉淀
 
-1. 设计 Agent 编排链路，完成意图识别、任务拆解、工具调用与结果校验；对高风险结论加入规则兜底与失败回退机制。
-2. 搭建 RAG 知识库，沉淀商品规则、活动 SOP、FAQ 与运营案例，优化切分、召回与重排策略，提升知识命中率。
-3. 基于 LangChain Tool / Function Calling 封装订单查询、商品查询、工单生成、通知推送等业务工具，打通自然语言到业务动作的执行链路。
+详细规格见：
 
-## 实现成果
+- `PROJECT_TECH_DOC.md`
+- `docs/DEVELOPMENT_PLAN_8_STEPS.md`
+- `docs/specs/step-01-foundation.md`
 
-1. 将商家高频咨询与异常定位从人工查资料转为对话式检索与工具联动，常见问题处理时长由约 5-8 分钟降至 20-40 秒响应级别。
-2. 构建覆盖 300+ 条规则 / SOP / FAQ 的知识库，通过检索增强 + 规则校验将问答命中率稳定在 Top-1 约 82%、Top-3 约 90%，提升回答稳定性与可解释性。
-3. 建立覆盖 120+ case 的评测与回测流程，经过 4 轮 Prompt 与工具编排迭代，端到端任务成功率由约 61% 提升至 79%。
+## 快速启动
 
-## 技术栈与开发工具
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-Python、FastAPI、LangChain、RAG、Redis、MySQL、Elasticsearch、MCP / Function Calling、SSE / WebSocket、Docker、Cursor + Claude Code
+## 最小 API 验证
+
+```bash
+curl http://127.0.0.1:8000/
+curl http://127.0.0.1:8000/api/v1/health
+```
+
+```bash
+curl -N -X POST "http://127.0.0.1:8000/api/v1/chat/stream" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id":"u_001",
+    "session_id":"s_001",
+    "message":"帮我看看订单异常怎么处理",
+    "context":{"channel":"merchant_console"}
+  }'
+```
+
+## 测试
+
+```bash
+pytest tests/test_health_api.py
+```
